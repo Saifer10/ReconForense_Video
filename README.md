@@ -3,9 +3,9 @@ ReconForense_video V1
 Esta herramienta esta pensada para el análisis forense de videos soportando los formatos a demanda, tiene una interfaz interactiva
 que ayudara a la ejecución de las tareas como:
 
-  -Análisis de autenticidad.
-  -Detección de posibles manipulaciones.
-  -Análisis cuadro por cuadro.
++Análisis de autenticidad
++Detección de posibles manipulaciones.
+ +Análisis cuadro por cuadro.
   *Identificación de frames duplicados.
   *Extracción de fotogramas.
   *Análisis de artefactos.
