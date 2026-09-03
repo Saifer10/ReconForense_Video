@@ -20,34 +20,11 @@
 * Comparación lado a lado.<br>
 * Sustracción de cambios entre original y resultado.<br>
 <br>
-<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcEMIi_JfBTrxIuN4GuDfbFAx4O1EvKtXTYcykS9L2dw&s=10" width="100">&nbsp;&nbsp;<img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Gnu-bash-logo.svg/1280px-Gnu-bash-logo.svg.png?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=thumbnail" width="90"><br>
+<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcEMIi_JfBTrxIuN4GuDfbFAx4O1EvKtXTYcykS9L2dw&s=10" width="100"><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Gnu-bash-logo.svg/1280px-Gnu-bash-logo.svg.png?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=thumbnail" width="90"><br>
 <br>
 Por medio del archivo <strong>install_ReconForensics.sh</strong> instale los complementos que requiere el programa
-    <title>Ejemplo de Recuadro de Código</title>
-    <style>
-        /* Estilo para el recuadro contenedor */
-        pre {
-            background-color: #666666; /* Fondo gris claro */
-            border: 1px solid #ddd;    /* Borde gris sutil */
-            border-left: 4px solid #007acc; /* Barra azul decorativa a la izquierda */
-            border-radius: 4px;        /* Esquinas ligeramente redondeadas */
-            padding: 6px;             /* Espacio interno */
-            overflow-x: auto;          /* Barra de desplazamiento si el código es muy largo */
-        }
-        /* Estilo para la tipografía del código */
-        code {
-            font-family: 'Courier New', Courier, monospace;
-            color: #FFF;
-        }
-    </style>
-</head>
-<body>
-
-    <p>Permisos de ejecucion para el archivo install_ReconForensic.py:</p>
-
-    <!-- El bloque de código principal -->
-    <pre><code>@chmod +x install_ReconForensic.sh</code></pre>
-
+<p>Permisos de ejecución para el archivo install_ReconForensic.py:</p>
+<pre><code>@chmod +x install_ReconForensic.sh</code></pre>
 El archivo <strong>Install_ReconForensics</strong> debe instalar los siguientes dependencias<br>
 <br>
     *  python3.<br> 
