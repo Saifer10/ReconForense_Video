@@ -1,0 +1,1878 @@
+# ============================================================
+# INTERFAZ GRAFICA
+# HIDRA ACADEMY - VIDEO FORENSICS LAB
+# ============================================================
+
+class VideoForensicsApp:
+
+    # ========================================================
+    # PALETA DE COLORES
+    # ========================================================
+
+    BG = "#020607"
+
+    PANEL = "#061012"
+
+    PANEL_2 = "#09191D"
+
+    CYAN = "#00DDF7"
+
+    CYAN_DARK = "#006C7A"
+
+    CYAN_SOFT = "#00AFC6"
+
+    TEXT = "#E6F8FA"
+
+    TEXT_DIM = "#7AA7AF"
+
+    SUCCESS = "#00D084"
+
+    WARNING = "#FFB020"
+
+    DANGER = "#FF3030"
+
+
+    # ========================================================
+    # INICIALIZACION
+    # ========================================================
+
+    def __init__(self, root):
+
+        self.root = root
+
+        self.root.title(
+            "HIDRA ACADEMY | VIDEO FORENSICS LAB"
+        )
+
+        self.root.geometry(
+            "1400x950"
+        )
+
+        self.root.minsize(
+            1100,
+            750
+        )
+
+        self.root.configure(
+            bg=self.BG
+        )
+
+
+        self.video_path = None
+
+        self.case_dir = None
+
+        self.dashboard_image = None
+
+        self.dashboard_photo = None
+
+
+        self.create_interface()
+
+
+    # ========================================================
+    # CREAR PANEL CON BORDE CYAN
+    # ========================================================
+
+    def create_panel(self, parent):
+
+        border = tk.Frame(
+
+            parent,
+
+            bg=self.CYAN
+
+        )
+
+
+        panel = tk.Frame(
+
+            border,
+
+            bg=self.PANEL
+
+        )
+
+
+        panel.pack(
+
+            fill="both",
+
+            expand=True,
+
+            padx=1,
+
+            pady=1
+
+        )
+
+
+        return border, panel
+
+
+    # ========================================================
+    # BOTON PERSONALIZADO
+    # ========================================================
+
+    def create_button(
+        self,
+        parent,
+        text,
+        command,
+        icon="◈",
+        color=None
+    ):
+
+        if color is None:
+
+            color = self.CYAN
+
+
+        button = tk.Button(
+
+            parent,
+
+            text=f"{icon}  {text}",
+
+            command=command,
+
+            font=(
+
+                "Consolas",
+
+                10,
+
+                "bold"
+
+            ),
+
+            bg=self.PANEL_2,
+
+            fg=color,
+
+            activebackground="#102A30",
+
+            activeforeground="#FFFFFF",
+
+            relief="flat",
+
+            bd=0,
+
+            padx=15,
+
+            pady=15,
+
+            cursor="hand2",
+
+            anchor="w",
+
+            highlightthickness=1,
+
+            highlightbackground=self.CYAN_DARK
+
+        )
+
+
+        return button
+
+
+    # ========================================================
+    # CARGAR IMAGEN PRINCIPAL
+    # ========================================================
+
+    def load_dashboard_image(self, parent):
+
+        try:
+
+            image = Image.open(
+                DASHBOARD_IMAGE
+            )
+
+
+            image = image.resize(
+
+                (
+                    850,
+                    550
+                ),
+
+                Image.LANCZOS
+
+            )
+
+
+            self.dashboard_photo = ImageTk.PhotoImage(
+                image
+            )
+
+
+            label = tk.Label(
+
+                parent,
+
+                image=self.dashboard_photo,
+
+                bg=self.PANEL
+
+            )
+
+
+            label.pack(
+
+                fill="both",
+
+                expand=True
+
+            )
+
+
+        except Exception as e:
+
+            error = tk.Label(
+
+                parent,
+
+                text=(
+
+                    "HIDRA ACADEMY\n\n"
+
+                    "ANÁLISIS FORENSE A LOS VIDEOS\n\n"
+
+                    f"No fue posible cargar:\n"
+                    f"{DASHBOARD_IMAGE}"
+
+                ),
+
+                bg=self.PANEL,
+
+                fg=self.CYAN,
+
+                font=(
+
+                    "Consolas",
+
+                    12,
+
+                    "bold"
+
+                )
+
+            )
+
+
+            error.pack(
+
+                fill="both",
+
+                expand=True
+
+            )
+
+
+    # ========================================================
+    # INTERFAZ PRINCIPAL
+    # ========================================================
+
+    def create_interface(self):
+
+
+        # ----------------------------------------------------
+        # CONTENEDOR GENERAL
+        # ----------------------------------------------------
+
+        main = tk.Frame(
+
+            self.root,
+
+            bg=self.BG
+
+        )
+
+
+        main.pack(
+
+            fill="both",
+
+            expand=True,
+
+            padx=20,
+
+            pady=20
+
+        )
+
+
+        # ====================================================
+        # HEADER
+        # ====================================================
+
+        header_border, header = self.create_panel(
+            main
+        )
+
+
+        header_border.pack(
+
+            fill="x",
+
+            pady=(0, 15)
+
+        )
+
+
+        header_left = tk.Frame(
+
+            header,
+
+            bg=self.PANEL
+
+        )
+
+
+        header_left.pack(
+
+            side="left",
+
+            fill="x",
+
+            expand=True,
+
+            padx=20,
+
+            pady=15
+
+        )
+
+
+        title = tk.Label(
+
+            header_left,
+
+            text="HIDRA ACADEMY",
+
+            font=(
+
+                "Arial",
+
+                24,
+
+                "bold"
+
+            ),
+
+            bg=self.PANEL,
+
+            fg=self.CYAN
+
+        )
+
+
+        title.pack(
+
+            anchor="w"
+
+        )
+
+
+        subtitle = tk.Label(
+
+            header_left,
+
+            text=(
+                "VIDEO FORENSICS LAB  |  "
+                "ANÁLISIS FORENSE DIGITAL"
+            ),
+
+            font=(
+
+                "Consolas",
+
+                11,
+
+                "bold"
+
+            ),
+
+            bg=self.PANEL,
+
+            fg=self.TEXT_DIM
+
+        )
+
+
+        subtitle.pack(
+
+            anchor="w",
+
+            pady=(3, 0)
+
+        )
+
+
+        system_status = tk.Label(
+
+            header,
+
+            text="● SISTEMA ACTIVO",
+
+            font=(
+
+                "Consolas",
+
+                10,
+
+                "bold"
+
+            ),
+
+            bg=self.PANEL,
+
+            fg=self.SUCCESS
+
+        )
+
+
+        system_status.pack(
+
+            side="right",
+
+            padx=25
+
+        )
+
+
+        # ====================================================
+        # CUERPO PRINCIPAL
+        # ====================================================
+
+        content = tk.Frame(
+
+            main,
+
+            bg=self.BG
+
+        )
+
+
+        content.pack(
+
+            fill="both",
+
+            expand=True
+
+        )
+
+
+        content.grid_columnconfigure(
+
+            0,
+
+            weight=4
+
+        )
+
+
+        content.grid_columnconfigure(
+
+            1,
+
+            weight=2
+
+        )
+
+
+        content.grid_rowconfigure(
+
+            0,
+
+            weight=3
+
+        )
+
+
+        content.grid_rowconfigure(
+
+            1,
+
+            weight=2
+
+        )
+
+
+        # ====================================================
+        # ILUSTRACION FORENSE
+        # ====================================================
+
+        visual_border, visual_panel = self.create_panel(
+            content
+        )
+
+
+        visual_border.grid(
+
+            row=0,
+
+            column=0,
+
+            sticky="nsew",
+
+            padx=(0, 10),
+
+            pady=(0, 10)
+
+        )
+
+
+        visual_title = tk.Label(
+
+            visual_panel,
+
+            text=(
+                "[ HIDRA ACADEMY // "
+                "VISUALIZACIÓN FORENSE ]"
+            ),
+
+            font=(
+
+                "Consolas",
+
+                10,
+
+                "bold"
+
+            ),
+
+            bg=self.PANEL,
+
+            fg=self.CYAN,
+
+            anchor="w"
+
+        )
+
+
+        visual_title.pack(
+
+            fill="x",
+
+            padx=15,
+
+            pady=10
+
+        )
+
+
+        image_container = tk.Frame(
+
+            visual_panel,
+
+            bg="#020809"
+
+        )
+
+
+        image_container.pack(
+
+            fill="both",
+
+            expand=True,
+
+            padx=10,
+
+            pady=(0, 10)
+
+        )
+
+
+        self.load_dashboard_image(
+            image_container
+        )
+
+
+        # ====================================================
+        # INFORMACION DEL CASO
+        # ====================================================
+
+        info_border, info_panel = self.create_panel(
+            content
+        )
+
+
+        info_border.grid(
+
+            row=0,
+
+            column=1,
+
+            sticky="nsew",
+
+            pady=(0, 10)
+
+        )
+
+
+        info = tk.Frame(
+
+            info_panel,
+
+            bg=self.PANEL
+
+        )
+
+
+        info.pack(
+
+            fill="both",
+
+            expand=True,
+
+            padx=15,
+
+            pady=15
+
+        )
+
+
+        info_title = tk.Label(
+
+            info,
+
+            text="[ EVIDENCIA DIGITAL ]",
+
+            font=(
+
+                "Consolas",
+
+                11,
+
+                "bold"
+
+            ),
+
+            bg=self.PANEL,
+
+            fg=self.CYAN
+
+        )
+
+
+        info_title.pack(
+
+            anchor="w",
+
+            pady=(0, 10)
+
+        )
+
+
+        self.video_label = tk.Label(
+
+            info,
+
+            text="NINGÚN VIDEO SELECCIONADO",
+
+            font=(
+
+                "Consolas",
+
+                9
+
+            ),
+
+            bg="#020B0D",
+
+            fg=self.TEXT_DIM,
+
+            justify="left",
+
+            anchor="nw",
+
+            padx=15,
+
+            pady=15,
+
+            wraplength=350,
+
+            highlightthickness=1,
+
+            highlightbackground=self.CYAN_DARK
+
+        )
+
+
+        self.video_label.pack(
+
+            fill="x"
+
+        )
+
+
+        select_button = self.create_button(
+
+            info,
+
+            "SELECCIONAR VIDEO",
+
+            self.select_video,
+
+            icon="▣"
+
+        )
+
+
+        select_button.pack(
+
+            fill="x",
+
+            pady=(10, 15)
+
+        )
+
+
+        # ----------------------------------------------------
+        # ESTADO DEL CASO
+        # ----------------------------------------------------
+
+        status_title = tk.Label(
+
+            info,
+
+            text="[ ESTADO DEL CASO ]",
+
+            font=(
+
+                "Consolas",
+
+                10,
+
+                "bold"
+
+            ),
+
+            bg=self.PANEL,
+
+            fg=self.CYAN
+
+        )
+
+
+        status_title.pack(
+
+            anchor="w"
+
+        )
+
+
+        self.case_status = tk.Label(
+
+            info,
+
+            text=(
+                "● ESPERANDO EVIDENCIA\n\n"
+                "Seleccione un archivo de video\n"
+                "para iniciar el análisis."
+            ),
+
+            font=(
+
+                "Consolas",
+
+                9
+
+            ),
+
+            bg=self.PANEL,
+
+            fg=self.WARNING,
+
+            justify="left",
+
+            anchor="w"
+
+        )
+
+
+        self.case_status.pack(
+
+            fill="x",
+
+            pady=10
+
+        )
+
+
+        # ====================================================
+        # PANEL DE ANALISIS
+        # ====================================================
+
+        analysis_border, analysis_panel = self.create_panel(
+            content
+        )
+
+
+        analysis_border.grid(
+
+            row=1,
+
+            column=0,
+
+            sticky="nsew",
+
+            padx=(0, 10)
+
+        )
+
+
+        analysis = tk.Frame(
+
+            analysis_panel,
+
+            bg=self.PANEL
+
+        )
+
+
+        analysis.pack(
+
+            fill="both",
+
+            expand=True,
+
+            padx=15,
+
+            pady=15
+
+        )
+
+
+        analysis_title = tk.Label(
+
+            analysis,
+
+            text="[ MÓDULOS DE ANÁLISIS FORENSE ]",
+
+            font=(
+
+                "Consolas",
+
+                11,
+
+                "bold"
+
+            ),
+
+            bg=self.PANEL,
+
+            fg=self.CYAN
+
+        )
+
+
+        analysis_title.pack(
+
+            anchor="w",
+
+            pady=(0, 10)
+
+        )
+
+
+        buttons_frame = tk.Frame(
+
+            analysis,
+
+            bg=self.PANEL
+
+        )
+
+
+        buttons_frame.pack(
+
+            fill="both",
+
+            expand=True
+
+        )
+
+
+        # ----------------------------------------------------
+        # BOTONES
+        # ----------------------------------------------------
+
+        buttons = [
+
+            (
+                "01  GENERAR HASH",
+
+                self.hash_analysis,
+
+                "⌗"
+            ),
+
+            (
+                "02  EXTRAER METADATOS",
+
+                self.metadata_analysis,
+
+                "▤"
+            ),
+
+            (
+                "03  EXTRAER FRAMES",
+
+                self.frames_analysis,
+
+                "▣"
+            ),
+
+            (
+                "04  FRAMES DUPLICADOS",
+
+                self.duplicate_analysis,
+
+                "▣"
+            ),
+
+            (
+                "05  DETECTAR CORTES",
+
+                self.cut_analysis,
+
+                "✂"
+            ),
+
+            (
+                "06  CAMBIOS DE ILUMINACIÓN",
+
+                self.lighting_analysis,
+
+                "☼"
+            ),
+
+            (
+                "07  INCONSISTENCIAS VISUALES",
+
+                self.visual_analysis,
+
+                "◉"
+            ),
+
+            (
+                "08  ANOMALÍAS TEMPORALES",
+
+                self.temporal_analysis,
+
+                "◷"
+            )
+
+        ]
+
+
+        for index, (
+            text,
+            command,
+            icon
+        ) in enumerate(buttons):
+
+
+            button = self.create_button(
+
+                buttons_frame,
+
+                text,
+
+                command,
+
+                icon
+
+            )
+
+
+            row = index // 2
+
+            column = index % 2
+
+
+            button.grid(
+
+                row=row,
+
+                column=column,
+
+                sticky="nsew",
+
+                padx=5,
+
+                pady=5
+
+            )
+
+
+        buttons_frame.grid_columnconfigure(
+            0,
+            weight=1
+        )
+
+        buttons_frame.grid_columnconfigure(
+            1,
+            weight=1
+        )
+
+
+        # ----------------------------------------------------
+        # BOTON ANALISIS COMPLETO
+        # ----------------------------------------------------
+
+        full_button = tk.Button(
+
+            analysis,
+
+            text=(
+                "⚡  EJECUTAR ANÁLISIS "
+                "FORENSE COMPLETO"
+            ),
+
+            command=self.full_analysis,
+
+            font=(
+
+                "Consolas",
+
+                11,
+
+                "bold"
+
+            ),
+
+            bg="#063025",
+
+            fg=self.SUCCESS,
+
+            activebackground="#0A4939",
+
+            activeforeground="#FFFFFF",
+
+            relief="flat",
+
+            cursor="hand2",
+
+            padx=20,
+
+            pady=15,
+
+            highlightthickness=1,
+
+            highlightbackground=self.SUCCESS
+
+        )
+
+
+        full_button.pack(
+
+            fill="x",
+
+            pady=(15, 0)
+
+        )
+
+
+        # ====================================================
+        # FLUJO FORENSE
+        # ====================================================
+
+        flow_border, flow_panel = self.create_panel(
+            content
+        )
+
+
+        flow_border.grid(
+
+            row=1,
+
+            column=1,
+
+            sticky="nsew"
+
+        )
+
+
+        flow = tk.Frame(
+
+            flow_panel,
+
+            bg=self.PANEL
+
+        )
+
+
+        flow.pack(
+
+            fill="both",
+
+            expand=True,
+
+            padx=15,
+
+            pady=15
+
+        )
+
+
+        flow_title = tk.Label(
+
+            flow,
+
+            text="[ FLUJO FORENSE ]",
+
+            font=(
+
+                "Consolas",
+
+                11,
+
+                "bold"
+
+            ),
+
+            bg=self.PANEL,
+
+            fg=self.CYAN
+
+        )
+
+
+        flow_title.pack(
+
+            anchor="w",
+
+            pady=(0, 10)
+
+        )
+
+
+        steps = [
+
+            "01  IDENTIFICAR EVIDENCIA",
+
+            "02  PRESERVAR ARCHIVO",
+
+            "03  GENERAR HASH",
+
+            "04  EXTRAER METADATOS",
+
+            "05  ANALIZAR FRAMES",
+
+            "06  VALIDAR CORTES",
+
+            "07  DETECTAR ANOMALÍAS",
+
+            "08  DOCUMENTAR",
+
+            "09  GENERAR REPORTE"
+
+        ]
+
+
+        for step in steps:
+
+            label = tk.Label(
+
+                flow,
+
+                text=f"✓  {step}",
+
+                font=(
+
+                    "Consolas",
+
+                    9,
+
+                    "bold"
+
+                ),
+
+                bg="#041012",
+
+                fg=self.TEXT_DIM,
+
+                anchor="w",
+
+                padx=10,
+
+                pady=7,
+
+                highlightthickness=1,
+
+                highlightbackground="#07333B"
+
+            )
+
+
+            label.pack(
+
+                fill="x",
+
+                pady=2
+
+            )
+
+
+        # ====================================================
+        # CONSOLA
+        # ====================================================
+
+        console_border, console_panel = self.create_panel(
+            main
+        )
+
+
+        console_border.pack(
+
+            fill="both",
+
+            pady=(15, 0)
+
+        )
+
+
+        console_title = tk.Label(
+
+            console_panel,
+
+            text=(
+                "[ ACTIVITY LOG / "
+                "FORENSIC TERMINAL ]"
+            ),
+
+            font=(
+
+                "Consolas",
+
+                10,
+
+                "bold"
+
+            ),
+
+            bg=self.PANEL,
+
+            fg=self.CYAN,
+
+            anchor="w"
+
+        )
+
+
+        console_title.pack(
+
+            fill="x",
+
+            padx=15,
+
+            pady=(10, 5)
+
+        )
+
+
+        self.status = tk.Text(
+
+            console_panel,
+
+            height=8,
+
+            bg="#020A0C",
+
+            fg=self.CYAN,
+
+            insertbackground=self.CYAN,
+
+            font=(
+
+                "Consolas",
+
+                10
+
+            ),
+
+            relief="flat",
+
+            padx=15,
+
+            pady=10,
+
+            highlightthickness=1,
+
+            highlightbackground="#07333B"
+
+        )
+
+
+        self.status.pack(
+
+            fill="both",
+
+            expand=True,
+
+            padx=15,
+
+            pady=(0, 15)
+
+        )
+
+
+        self.status.insert(
+
+            tk.END,
+
+            "[SYSTEM] HIDRA ACADEMY VIDEO FORENSICS LAB\n"
+
+        )
+
+        self.status.insert(
+
+            tk.END,
+
+            "[SYSTEM] Esperando evidencia digital...\n"
+
+        )
+
+
+    # ========================================================
+    # SISTEMA DE LOG
+    # ========================================================
+
+    def log(self, message):
+
+        def write_log():
+
+            timestamp = datetime.now().strftime(
+                "%H:%M:%S"
+            )
+
+            self.status.insert(
+
+                tk.END,
+
+                f"[{timestamp}] {message}\n"
+
+            )
+
+            self.status.see(
+                tk.END
+            )
+
+
+        self.root.after(
+            0,
+            write_log
+        )
+
+
+    # ========================================================
+    # SELECCIONAR VIDEO
+    # ========================================================
+
+    def select_video(self):
+
+        video = filedialog.askopenfilename(
+
+            title="Seleccionar evidencia de video",
+
+            filetypes=[
+
+                (
+
+                    "Archivos de video",
+
+                    "*.mp4 *.avi *.mov *.mkv *.wmv *.mpeg *.webm"
+
+                ),
+
+                (
+
+                    "Todos los archivos",
+
+                    "*.*"
+
+                )
+
+            ]
+
+        )
+
+
+        if video:
+
+            self.video_path = video
+
+
+            self.case_dir = create_case_directory(
+                video
+            )
+
+
+            filename = os.path.basename(
+                video
+            )
+
+
+            self.video_label.config(
+
+                text=(
+
+                    f"ARCHIVO:\n"
+                    f"{filename}\n\n"
+
+                    f"RUTA:\n"
+                    f"{video}\n\n"
+
+                    f"CASO:\n"
+                    f"{self.case_dir}"
+
+                ),
+
+                fg=self.TEXT
+
+            )
+
+
+            self.case_status.config(
+
+                text=(
+
+                    "● EVIDENCIA CARGADA\n\n"
+
+                    "Integridad pendiente\n"
+                    "de validación."
+
+                ),
+
+                fg=self.SUCCESS
+
+            )
+
+
+            self.log(
+                "[+] Evidencia digital seleccionada."
+            )
+
+            self.log(
+                f"[+] Archivo: {filename}"
+            )
+
+            self.log(
+                f"[+] Caso creado: {self.case_dir}"
+            )
+
+
+    # ========================================================
+    # VALIDAR VIDEO
+    # ========================================================
+
+    def check_video(self):
+
+        if not self.video_path:
+
+            messagebox.showwarning(
+
+                "Advertencia",
+
+                "Primero seleccione un video."
+
+            )
+
+            return False
+
+
+        return True
+
+
+    # ========================================================
+    # EJECUTAR THREAD
+    # ========================================================
+
+    def run_thread(self, function):
+
+        thread = threading.Thread(
+
+            target=function,
+
+            daemon=True
+
+        )
+
+        thread.start()
+
+
+    # ========================================================
+    # HASH
+    # ========================================================
+
+    def hash_analysis(self):
+
+        if not self.check_video():
+            return
+
+        self.run_thread(
+            self._hash_analysis
+        )
+
+
+    def _hash_analysis(self):
+
+        self.log(
+            "[ANALYSIS] Generando hashes..."
+        )
+
+        hashes, output = generate_hash(
+
+            self.video_path,
+
+            self.case_dir
+
+        )
+
+        self.log(
+            "[SUCCESS] Hashes generados."
+        )
+
+        self.log(
+            f"[OUTPUT] {output}"
+        )
+
+
+    # ========================================================
+    # METADATOS
+    # ========================================================
+
+    def metadata_analysis(self):
+
+        if not self.check_video():
+            return
+
+        self.run_thread(
+            self._metadata_analysis
+        )
+
+
+    def _metadata_analysis(self):
+
+        self.log(
+            "[ANALYSIS] Extrayendo metadatos..."
+        )
+
+        output = extract_metadata(
+
+            self.video_path,
+
+            self.case_dir
+
+        )
+
+        self.log(
+            f"[SUCCESS] Metadatos: {output}"
+        )
+
+
+    # ========================================================
+    # FRAMES
+    # ========================================================
+
+    def frames_analysis(self):
+
+        if not self.check_video():
+            return
+
+        self.run_thread(
+            self._frames_analysis
+        )
+
+
+    def _frames_analysis(self):
+
+        self.log(
+            "[ANALYSIS] Extrayendo frames..."
+        )
+
+        output = extract_frames(
+
+            self.video_path,
+
+            self.case_dir
+
+        )
+
+        self.log(
+            f"[SUCCESS] Frames: {output}"
+        )
+
+
+    # ========================================================
+    # FRAMES DUPLICADOS
+    # ========================================================
+
+    def duplicate_analysis(self):
+
+        if not self.check_video():
+            return
+
+        self.run_thread(
+            self._duplicate_analysis
+        )
+
+
+    def _duplicate_analysis(self):
+
+        self.log(
+            "[ANALYSIS] Analizando frames duplicados..."
+        )
+
+        results = detect_duplicate_frames(
+
+            self.video_path,
+
+            self.case_dir
+
+        )
+
+        self.log(
+            f"[RESULT] Duplicados: {len(results)}"
+        )
+
+
+    # ========================================================
+    # CORTES
+    # ========================================================
+
+    def cut_analysis(self):
+
+        if not self.check_video():
+            return
+
+        self.run_thread(
+            self._cut_analysis
+        )
+
+
+    def _cut_analysis(self):
+
+        self.log(
+            "[ANALYSIS] Detectando cortes..."
+        )
+
+        results = detect_cuts(
+
+            self.video_path,
+
+            self.case_dir
+
+        )
+
+        self.log(
+            f"[RESULT] Posibles cortes: {len(results)}"
+        )
+
+
+    # ========================================================
+    # ILUMINACION
+    # ========================================================
+
+    def lighting_analysis(self):
+
+        if not self.check_video():
+            return
+
+        self.run_thread(
+            self._lighting_analysis
+        )
+
+
+    def _lighting_analysis(self):
+
+        self.log(
+            "[ANALYSIS] Analizando iluminación..."
+        )
+
+        results = detect_lighting_changes(
+
+            self.video_path,
+
+            self.case_dir
+
+        )
+
+        self.log(
+            f"[RESULT] Cambios detectados: {len(results)}"
+        )
+
+
+    # ========================================================
+    # INCONSISTENCIAS VISUALES
+    # ========================================================
+
+    def visual_analysis(self):
+
+        if not self.check_video():
+            return
+
+        self.run_thread(
+            self._visual_analysis
+        )
+
+
+    def _visual_analysis(self):
+
+        self.log(
+            "[ANALYSIS] Analizando inconsistencias visuales..."
+        )
+
+        results = detect_visual_anomalies(
+
+            self.video_path,
+
+            self.case_dir
+
+        )
+
+        self.log(
+            f"[RESULT] Anomalías: {len(results)}"
+        )
+
+
+    # ========================================================
+    # ANOMALIAS TEMPORALES
+    # ========================================================
+
+    def temporal_analysis(self):
+
+        if not self.check_video():
+            return
+
+        self.run_thread(
+            self._temporal_analysis
+        )
+
+
+    def _temporal_analysis(self):
+
+        self.log(
+            "[ANALYSIS] Analizando anomalías temporales..."
+        )
+
+        results = detect_temporal_anomalies(
+
+            self.video_path,
+
+            self.case_dir
+
+        )
+
+        self.log(
+            f"[RESULT] Anomalías temporales: {len(results)}"
+        )
+
+
+    # ========================================================
+    # ANALISIS COMPLETO
+    # ========================================================
+
+    def full_analysis(self):
+
+        if not self.check_video():
+            return
+
+        self.run_thread(
+            self._full_analysis
+        )
+
+
+    def _full_analysis(self):
+
+        try:
+
+            self.log(
+                "[SYSTEM] =================================="
+            )
+
+            self.log(
+                "[SYSTEM] INICIANDO ANALISIS FORENSE"
+            )
+
+            self.log(
+                "[SYSTEM] =================================="
+            )
+
+
+            report = generate_report(
+
+                self.video_path,
+
+                self.case_dir
+
+            )
+
+
+            self.log(
+                "[SUCCESS] ANALISIS COMPLETADO"
+            )
+
+            self.log(
+                f"[REPORT] {report}"
+            )
+
+
+            def update_interface():
+
+                self.case_status.config(
+
+                    text=(
+
+                        "● ANÁLISIS COMPLETADO\n\n"
+
+                        "Reporte forense generado\n"
+                        "correctamente."
+
+                    ),
+
+                    fg=self.SUCCESS
+
+                )
+
+
+                messagebox.showinfo(
+
+                    "Análisis terminado",
+
+                    f"Reporte generado en:\n\n{report}"
+
+                )
+
+
+            self.root.after(
+                0,
+                update_interface
+            )
+
+
+        except Exception as e:
+
+            self.log(
+                f"[ERROR] {str(e)}"
+            )
+
+
+            self.root.after(
+
+                0,
+
+                lambda:
+
+                messagebox.showerror(
+
+                    "Error",
+
+                    str(e)
+
+                )
+
+            )
