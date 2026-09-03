@@ -1,0 +1,1537 @@
+#!/usr/bin/env python3
+
+import os
+import json
+import csv
+import hashlib
+import shutil
+import subprocess
+import threading
+from datetime import datetime
+import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
+
+import cv2
+import numpy as np
+
+
+# ============================================================
+# CONFIGURACION
+# ============================================================
+
+APP_NAME = "Video Forensics Lab"
+
+BASE_DIR = os.path.expanduser("~/VideoForensics")
+OUTPUT_DIR = os.path.join(BASE_DIR, "output")
+
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+
+# ============================================================
+# FUNCIONES GENERALES
+# ============================================================
+
+def safe_filename(text):
+    """Genera un nombre seguro para archivos."""
+    return "".join(
+        c if c.isalnum() or c in ("_", "-", ".") else "_"
+        for c in text
+    )
+
+
+def create_case_directory(video_path):
+    """
+    Crea un directorio independiente para cada analisis.
+    """
+
+    video_name = os.path.basename(video_path)
+    name = os.path.splitext(video_name)[0]
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    case_name = f"{safe_filename(name)}_{timestamp}"
+
+    case_dir = os.path.join(
+        OUTPUT_DIR,
+        case_name
+    )
+
+    os.makedirs(case_dir, exist_ok=True)
+
+    return case_dir
+
+
+def run_command(command):
+    """
+    Ejecuta comandos del sistema y retorna salida.
+    """
+
+    try:
+
+        result = subprocess.run(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+
+        return {
+            "returncode": result.returncode,
+            "stdout": result.stdout,
+            "stderr": result.stderr
+        }
+
+    except Exception as e:
+
+        return {
+            "returncode": -1,
+            "stdout": "",
+            "stderr": str(e)
+        }
+
+
+# ============================================================
+# ANALISIS DE HASH
+# ============================================================
+
+def generate_hash(video_path, output_dir):
+
+    algorithms = [
+        "md5",
+        "sha1",
+        "sha256",
+        "sha512"
+    ]
+
+    results = {}
+
+    for algorithm in algorithms:
+
+        hasher = hashlib.new(algorithm)
+
+        with open(video_path, "rb") as file:
+
+            while True:
+
+                data = file.read(1024 * 1024)
+
+                if not data:
+                    break
+
+                hasher.update(data)
+
+        results[algorithm.upper()] = hasher.hexdigest()
+
+    output_file = os.path.join(
+        output_dir,
+        "hashes.txt"
+    )
+
+    with open(output_file, "w") as file:
+
+        file.write("VIDEO FORENSIC HASH REPORT\n")
+        file.write("=" * 60 + "\n\n")
+
+        file.write(
+            f"Archivo: {video_path}\n"
+        )
+
+        file.write(
+            f"Fecha: {datetime.now()}\n\n"
+        )
+
+        for algorithm, value in results.items():
+
+            file.write(
+                f"{algorithm}: {value}\n"
+            )
+
+    return results, output_file
+
+
+# ============================================================
+# METADATOS EXIFTOOL
+# ============================================================
+
+def extract_metadata(video_path, output_dir):
+
+    output_file = os.path.join(
+        output_dir,
+        "metadata_exiftool.txt"
+    )
+
+    command = [
+        "exiftool",
+        "-G1",
+        "-a",
+        "-s",
+        video_path
+    ]
+
+    result = run_command(command)
+
+    with open(
+        output_file,
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        file.write(result["stdout"])
+
+        if result["stderr"]:
+
+            file.write("\n\nERRORES:\n")
+
+            file.write(
+                result["stderr"]
+            )
+
+    return output_file
+
+
+# ============================================================
+# INFORMACION TECNICA FFPROBE
+# ============================================================
+
+def extract_ffprobe(video_path, output_dir):
+
+    output_file = os.path.join(
+        output_dir,
+        "ffprobe.json"
+    )
+
+    command = [
+
+        "ffprobe",
+
+        "-v",
+        "quiet",
+
+        "-print_format",
+        "json",
+
+        "-show_format",
+
+        "-show_streams",
+
+        "-show_frames",
+
+        video_path
+    ]
+
+    result = run_command(command)
+
+    with open(
+        output_file,
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        file.write(result["stdout"])
+
+    return output_file
+
+
+# ============================================================
+# OBTENER INFORMACION DEL VIDEO
+# ============================================================
+
+def get_video_info(video_path):
+
+    capture = cv2.VideoCapture(video_path)
+
+    if not capture.isOpened():
+
+        raise RuntimeError(
+            "No fue posible abrir el video."
+        )
+
+    fps = capture.get(
+        cv2.CAP_PROP_FPS
+    )
+
+    frame_count = int(
+        capture.get(
+            cv2.CAP_PROP_FRAME_COUNT
+        )
+    )
+
+    width = int(
+        capture.get(
+            cv2.CAP_PROP_FRAME_WIDTH
+        )
+    )
+
+    height = int(
+        capture.get(
+            cv2.CAP_PROP_FRAME_HEIGHT
+        )
+    )
+
+    duration = 0
+
+    if fps > 0:
+
+        duration = frame_count / fps
+
+    capture.release()
+
+    return {
+
+        "fps": fps,
+
+        "frames": frame_count,
+
+        "width": width,
+
+        "height": height,
+
+        "duration": duration
+    }
+
+
+# ============================================================
+# EXTRACCION DE FRAMES
+# ============================================================
+
+def extract_frames(video_path, output_dir):
+
+    frames_dir = os.path.join(
+        output_dir,
+        "frames"
+    )
+
+    os.makedirs(
+        frames_dir,
+        exist_ok=True
+    )
+
+    command = [
+
+        "ffmpeg",
+
+        "-i",
+        video_path,
+
+        "-vsync",
+        "0",
+
+        os.path.join(
+            frames_dir,
+            "frame_%08d.png"
+        )
+    ]
+
+    result = run_command(command)
+
+    return frames_dir
+
+
+# ============================================================
+# CALCULO DE DIFERENCIA ENTRE FRAMES
+# ============================================================
+
+def frame_difference(frame1, frame2):
+
+    gray1 = cv2.cvtColor(
+        frame1,
+        cv2.COLOR_BGR2GRAY
+    )
+
+    gray2 = cv2.cvtColor(
+        frame2,
+        cv2.COLOR_BGR2GRAY
+    )
+
+    difference = cv2.absdiff(
+        gray1,
+        gray2
+    )
+
+    score = np.mean(
+        difference
+    )
+
+    return score
+
+
+# ============================================================
+# DETECCION DE FRAMES DUPLICADOS
+# ============================================================
+
+def detect_duplicate_frames(
+    video_path,
+    output_dir,
+    threshold=1.0
+):
+
+    capture = cv2.VideoCapture(video_path)
+
+    duplicates = []
+
+    previous_frame = None
+
+    frame_number = 0
+
+    while True:
+
+        success, frame = capture.read()
+
+        if not success:
+
+            break
+
+        if previous_frame is not None:
+
+            score = frame_difference(
+                previous_frame,
+                frame
+            )
+
+            if score < threshold:
+
+                duplicates.append({
+
+                    "frame": frame_number,
+
+                    "difference_score": float(score)
+
+                })
+
+        previous_frame = frame.copy()
+
+        frame_number += 1
+
+    capture.release()
+
+    output_file = os.path.join(
+        output_dir,
+        "duplicate_frames.json"
+    )
+
+    with open(
+        output_file,
+        "w"
+    ) as file:
+
+        json.dump(
+            duplicates,
+            file,
+            indent=4
+        )
+
+    return duplicates
+
+
+# ============================================================
+# DETECCION DE CAMBIOS BRUSCOS / CORTES
+# ============================================================
+
+def detect_cuts(
+    video_path,
+    output_dir,
+    threshold=30
+):
+
+    capture = cv2.VideoCapture(video_path)
+
+    cuts = []
+
+    previous_frame = None
+
+    frame_number = 0
+
+    while True:
+
+        success, frame = capture.read()
+
+        if not success:
+
+            break
+
+        if previous_frame is not None:
+
+            score = frame_difference(
+                previous_frame,
+                frame
+            )
+
+            if score > threshold:
+
+                cuts.append({
+
+                    "frame": frame_number,
+
+                    "difference_score": float(score)
+
+                })
+
+        previous_frame = frame.copy()
+
+        frame_number += 1
+
+    capture.release()
+
+    output_file = os.path.join(
+        output_dir,
+        "possible_cuts.json"
+    )
+
+    with open(
+        output_file,
+        "w"
+    ) as file:
+
+        json.dump(
+            cuts,
+            file,
+            indent=4
+        )
+
+    return cuts
+
+
+# ============================================================
+# ANALISIS DE ILUMINACION
+# ============================================================
+
+def detect_lighting_changes(
+    video_path,
+    output_dir,
+    threshold=25
+):
+
+    capture = cv2.VideoCapture(video_path)
+
+    changes = []
+
+    previous_brightness = None
+
+    frame_number = 0
+
+    while True:
+
+        success, frame = capture.read()
+
+        if not success:
+
+            break
+
+        gray = cv2.cvtColor(
+            frame,
+            cv2.COLOR_BGR2GRAY
+        )
+
+        brightness = np.mean(gray)
+
+        if previous_brightness is not None:
+
+            difference = abs(
+                brightness -
+                previous_brightness
+            )
+
+            if difference > threshold:
+
+                changes.append({
+
+                    "frame": frame_number,
+
+                    "brightness": float(
+                        brightness
+                    ),
+
+                    "difference": float(
+                        difference
+                    )
+
+                })
+
+        previous_brightness = brightness
+
+        frame_number += 1
+
+    capture.release()
+
+    output_file = os.path.join(
+        output_dir,
+        "lighting_changes.json"
+    )
+
+    with open(
+        output_file,
+        "w"
+    ) as file:
+
+        json.dump(
+            changes,
+            file,
+            indent=4
+        )
+
+    return changes
+
+
+# ============================================================
+# DETECCION DE INCONSISTENCIAS VISUALES
+# ============================================================
+
+def detect_visual_anomalies(
+    video_path,
+    output_dir
+):
+
+    capture = cv2.VideoCapture(video_path)
+
+    anomalies = []
+
+    previous_frame = None
+
+    frame_number = 0
+
+    while True:
+
+        success, frame = capture.read()
+
+        if not success:
+
+            break
+
+        gray = cv2.cvtColor(
+            frame,
+            cv2.COLOR_BGR2GRAY
+        )
+
+        blur_value = cv2.Laplacian(
+            gray,
+            cv2.CV_64F
+        ).var()
+
+        brightness = np.mean(
+            gray
+        )
+
+        if previous_frame is not None:
+
+            difference = frame_difference(
+                previous_frame,
+                frame
+            )
+
+            # Valores que pueden indicar
+            # anomalías visuales importantes.
+
+            if (
+                blur_value < 20
+                or brightness < 15
+                or brightness > 245
+            ):
+
+                anomalies.append({
+
+                    "frame": frame_number,
+
+                    "blur_score": float(
+                        blur_value
+                    ),
+
+                    "brightness": float(
+                        brightness
+                    ),
+
+                    "frame_difference": float(
+                        difference
+                    )
+
+                })
+
+        previous_frame = frame.copy()
+
+        frame_number += 1
+
+    capture.release()
+
+    output_file = os.path.join(
+        output_dir,
+        "visual_anomalies.json"
+    )
+
+    with open(
+        output_file,
+        "w"
+    ) as file:
+
+        json.dump(
+            anomalies,
+            file,
+            indent=4
+        )
+
+    return anomalies
+
+
+# ============================================================
+# ANALISIS DE POSIBLES FRAMES ELIMINADOS O INSERTADOS
+# ============================================================
+
+def detect_temporal_anomalies(
+    video_path,
+    output_dir
+):
+
+    capture = cv2.VideoCapture(video_path)
+
+    anomalies = []
+
+    frames = []
+
+    while True:
+
+        success, frame = capture.read()
+
+        if not success:
+
+            break
+
+        small = cv2.resize(
+            frame,
+            (160, 90)
+        )
+
+        gray = cv2.cvtColor(
+            small,
+            cv2.COLOR_BGR2GRAY
+        )
+
+        frames.append(
+            gray
+        )
+
+    capture.release()
+
+    for i in range(
+        1,
+        len(frames) - 1
+    ):
+
+        previous_frame = frames[i - 1]
+
+        current_frame = frames[i]
+
+        next_frame = frames[i + 1]
+
+        diff_previous = np.mean(
+            cv2.absdiff(
+                previous_frame,
+                current_frame
+            )
+        )
+
+        diff_next = np.mean(
+            cv2.absdiff(
+                current_frame,
+                next_frame
+            )
+        )
+
+        bridge_difference = np.mean(
+            cv2.absdiff(
+                previous_frame,
+                next_frame
+            )
+        )
+
+        # Heurística básica:
+        # un salto temporal fuerte entre
+        # frame anterior y siguiente puede
+        # indicar una discontinuidad.
+
+        if bridge_difference > 40:
+
+            anomalies.append({
+
+                "frame": i,
+
+                "previous_difference": float(
+                    diff_previous
+                ),
+
+                "next_difference": float(
+                    diff_next
+                ),
+
+                "temporal_jump": float(
+                    bridge_difference
+                ),
+
+                "indicator":
+                    "Possible temporal discontinuity"
+
+            })
+
+    output_file = os.path.join(
+        output_dir,
+        "temporal_anomalies.json"
+    )
+
+    with open(
+        output_file,
+        "w"
+    ) as file:
+
+        json.dump(
+            anomalies,
+            file,
+            indent=4
+        )
+
+    return anomalies
+
+
+# ============================================================
+# GENERAR REPORTE
+# ============================================================
+
+def generate_report(
+    video_path,
+    output_dir
+):
+
+    report_file = os.path.join(
+        output_dir,
+        "forensic_report.txt"
+    )
+
+    info = get_video_info(
+        video_path
+    )
+
+    hashes, hash_file = generate_hash(
+        video_path,
+        output_dir
+    )
+
+    metadata_file = extract_metadata(
+        video_path,
+        output_dir
+    )
+
+    duplicates = detect_duplicate_frames(
+        video_path,
+        output_dir
+    )
+
+    cuts = detect_cuts(
+        video_path,
+        output_dir
+    )
+
+    lighting = detect_lighting_changes(
+        video_path,
+        output_dir
+    )
+
+    temporal = detect_temporal_anomalies(
+        video_path,
+        output_dir
+    )
+
+    visual = detect_visual_anomalies(
+        video_path,
+        output_dir
+    )
+
+    with open(
+        report_file,
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        file.write(
+            "VIDEO FORENSIC ANALYSIS REPORT\n"
+        )
+
+        file.write(
+            "=" * 70 + "\n\n"
+        )
+
+        file.write(
+            f"Fecha del análisis: {datetime.now()}\n"
+        )
+
+        file.write(
+            f"Archivo analizado: {video_path}\n\n"
+        )
+
+        file.write(
+            "INFORMACION TECNICA\n"
+        )
+
+        file.write(
+            "-" * 70 + "\n"
+        )
+
+        for key, value in info.items():
+
+            file.write(
+                f"{key}: {value}\n"
+            )
+
+        file.write("\n")
+
+        file.write(
+            "HASHES\n"
+        )
+
+        file.write(
+            "-" * 70 + "\n"
+        )
+
+        for algorithm, value in hashes.items():
+
+            file.write(
+                f"{algorithm}: {value}\n"
+            )
+
+        file.write("\n")
+
+        file.write(
+            "RESULTADOS DE DETECCION\n"
+        )
+
+        file.write(
+            "-" * 70 + "\n"
+        )
+
+        file.write(
+            f"Frames duplicados detectados: "
+            f"{len(duplicates)}\n"
+        )
+
+        file.write(
+            f"Posibles cortes detectados: "
+            f"{len(cuts)}\n"
+        )
+
+        file.write(
+            f"Cambios de iluminación: "
+            f"{len(lighting)}\n"
+        )
+
+        file.write(
+            f"Posibles discontinuidades temporales: "
+            f"{len(temporal)}\n"
+        )
+
+        file.write(
+            f"Anomalías visuales: "
+            f"{len(visual)}\n"
+        )
+
+        file.write("\n")
+
+        file.write(
+            "NOTA FORENSE\n"
+        )
+
+        file.write(
+            "-" * 70 + "\n"
+        )
+
+        file.write(
+            "Los resultados identificados por "
+            "los algoritmos corresponden a "
+            "indicadores técnicos y anomalías "
+            "que requieren validación manual. "
+            "Un cambio de compresión, movimiento "
+            "rápido de cámara, transición legítima "
+            "o recodificación puede producir "
+            "resultados similares a una manipulación.\n"
+        )
+
+    return report_file
+
+
+# ============================================================
+# INTERFAZ GRAFICA
+# ============================================================
+
+class VideoForensicsApp:
+
+    def __init__(self, root):
+
+        self.root = root
+
+        self.root.title(
+            APP_NAME
+        )
+
+        self.root.geometry(
+            "900x650"
+        )
+
+        self.video_path = None
+
+        self.case_dir = None
+
+        self.create_interface()
+
+
+    def create_interface(self):
+
+        title = tk.Label(
+
+            self.root,
+
+            text="VIDEO FORENSICS LAB",
+
+            font=(
+                "Arial",
+                20,
+                "bold"
+            )
+        )
+
+        title.pack(
+            pady=15
+        )
+
+
+        self.video_label = tk.Label(
+
+            self.root,
+
+            text="No se ha seleccionado ningún video",
+
+            wraplength=800
+        )
+
+        self.video_label.pack(
+            pady=10
+        )
+
+
+        select_button = tk.Button(
+
+            self.root,
+
+            text="Seleccionar Video",
+
+            command=self.select_video,
+
+            width=30,
+
+            height=2
+        )
+
+        select_button.pack(
+            pady=10
+        )
+
+
+        button_frame = tk.Frame(
+            self.root
+        )
+
+        button_frame.pack(
+            pady=10
+        )
+
+
+        buttons = [
+
+            (
+                "Generar Hash",
+                self.hash_analysis
+            ),
+
+            (
+                "Extraer Metadatos",
+                self.metadata_analysis
+            ),
+
+            (
+                "Extraer Frames",
+                self.frames_analysis
+            ),
+
+            (
+                "Detectar Frames Duplicados",
+                self.duplicate_analysis
+            ),
+
+            (
+                "Detectar Cortes",
+                self.cut_analysis
+            ),
+
+            (
+                "Detectar Cambios de Iluminación",
+                self.lighting_analysis
+            ),
+
+            (
+                "Detectar Inconsistencias Visuales",
+                self.visual_analysis
+            ),
+
+            (
+                "Analizar Anomalías Temporales",
+                self.temporal_analysis
+            ),
+
+            (
+                "EJECUTAR ANÁLISIS COMPLETO",
+                self.full_analysis
+            )
+
+        ]
+
+
+        for index, (
+            text,
+            command
+        ) in enumerate(buttons):
+
+            button = tk.Button(
+
+                button_frame,
+
+                text=text,
+
+                command=command,
+
+                width=35,
+
+                height=2
+            )
+
+            row = index // 2
+
+            column = index % 2
+
+            button.grid(
+
+                row=row,
+
+                column=column,
+
+                padx=10,
+
+                pady=8
+            )
+
+
+        self.status = tk.Text(
+
+            self.root,
+
+            height=12,
+
+            width=100
+        )
+
+        self.status.pack(
+            pady=15
+        )
+
+
+    def log(self, message):
+
+        self.status.insert(
+            tk.END,
+            message + "\n"
+        )
+
+        self.status.see(
+            tk.END
+        )
+
+        self.root.update()
+
+
+    def select_video(self):
+
+        video = filedialog.askopenfilename(
+
+            title="Seleccionar video",
+
+            filetypes=[
+
+                (
+                    "Videos",
+
+                    "*.mp4 *.avi *.mov *.mkv *.wmv"
+                ),
+
+                (
+                    "Todos",
+
+                    "*.*"
+                )
+
+            ]
+        )
+
+        if video:
+
+            self.video_path = video
+
+            self.case_dir = create_case_directory(
+                video
+            )
+
+            self.video_label.config(
+
+                text=(
+                    f"Video: {video}\n"
+                    f"Resultados: {self.case_dir}"
+                )
+            )
+
+            self.log(
+                "[+] Video seleccionado."
+            )
+
+
+    def check_video(self):
+
+        if not self.video_path:
+
+            messagebox.showwarning(
+
+                "Advertencia",
+
+                "Primero seleccione un video."
+            )
+
+            return False
+
+        return True
+
+
+    def run_thread(self, function):
+
+        thread = threading.Thread(
+
+            target=function,
+
+            daemon=True
+        )
+
+        thread.start()
+
+
+    def hash_analysis(self):
+
+        if not self.check_video():
+
+            return
+
+        self.run_thread(
+            self._hash_analysis
+        )
+
+
+    def _hash_analysis(self):
+
+        self.log(
+            "[+] Generando hashes..."
+        )
+
+        hashes, output = generate_hash(
+
+            self.video_path,
+
+            self.case_dir
+        )
+
+        self.log(
+            "[+] Hash generado."
+        )
+
+        self.log(
+            f"[+] Resultado: {output}"
+        )
+
+
+    def metadata_analysis(self):
+
+        if not self.check_video():
+
+            return
+
+        self.run_thread(
+            self._metadata_analysis
+        )
+
+
+    def _metadata_analysis(self):
+
+        self.log(
+            "[+] Extrayendo metadatos..."
+        )
+
+        output = extract_metadata(
+
+            self.video_path,
+
+            self.case_dir
+        )
+
+        self.log(
+            f"[+] Metadatos guardados: {output}"
+        )
+
+
+    def frames_analysis(self):
+
+        if not self.check_video():
+
+            return
+
+        self.run_thread(
+            self._frames_analysis
+        )
+
+
+    def _frames_analysis(self):
+
+        self.log(
+            "[+] Extrayendo frames..."
+        )
+
+        output = extract_frames(
+
+            self.video_path,
+
+            self.case_dir
+        )
+
+        self.log(
+            f"[+] Frames guardados: {output}"
+        )
+
+
+    def duplicate_analysis(self):
+
+        if not self.check_video():
+
+            return
+
+        self.run_thread(
+            self._duplicate_analysis
+        )
+
+
+    def _duplicate_analysis(self):
+
+        self.log(
+            "[+] Analizando frames duplicados..."
+        )
+
+        results = detect_duplicate_frames(
+
+            self.video_path,
+
+            self.case_dir
+        )
+
+        self.log(
+            f"[+] Posibles duplicados: "
+            f"{len(results)}"
+        )
+
+
+    def cut_analysis(self):
+
+        if not self.check_video():
+
+            return
+
+        self.run_thread(
+            self._cut_analysis
+        )
+
+
+    def _cut_analysis(self):
+
+        self.log(
+            "[+] Detectando cortes..."
+        )
+
+        results = detect_cuts(
+
+            self.video_path,
+
+            self.case_dir
+        )
+
+        self.log(
+            f"[+] Posibles cortes: "
+            f"{len(results)}"
+        )
+
+
+    def lighting_analysis(self):
+
+        if not self.check_video():
+
+            return
+
+        self.run_thread(
+            self._lighting_analysis
+        )
+
+
+    def _lighting_analysis(self):
+
+        self.log(
+            "[+] Analizando iluminación..."
+        )
+
+        results = detect_lighting_changes(
+
+            self.video_path,
+
+            self.case_dir
+        )
+
+        self.log(
+            f"[+] Cambios detectados: "
+            f"{len(results)}"
+        )
+
+
+    def visual_analysis(self):
+
+        if not self.check_video():
+
+            return
+
+        self.run_thread(
+            self._visual_analysis
+        )
+
+
+    def _visual_analysis(self):
+
+        self.log(
+            "[+] Analizando inconsistencias..."
+        )
+
+        results = detect_visual_anomalies(
+
+            self.video_path,
+
+            self.case_dir
+        )
+
+        self.log(
+            f"[+] Anomalías visuales: "
+            f"{len(results)}"
+        )
+
+
+    def temporal_analysis(self):
+
+        if not self.check_video():
+
+            return
+
+        self.run_thread(
+            self._temporal_analysis
+        )
+
+
+    def _temporal_analysis(self):
+
+        self.log(
+            "[+] Analizando discontinuidades temporales..."
+        )
+
+        results = detect_temporal_anomalies(
+
+            self.video_path,
+
+            self.case_dir
+        )
+
+        self.log(
+            f"[+] Anomalías temporales: "
+            f"{len(results)}"
+        )
+
+
+    def full_analysis(self):
+
+        if not self.check_video():
+
+            return
+
+        self.run_thread(
+            self._full_analysis
+        )
+
+
+    def _full_analysis(self):
+
+        try:
+
+            self.log(
+                "[+] INICIANDO ANÁLISIS FORENSE COMPLETO"
+            )
+
+            self.log(
+                "[+] Esto puede tardar dependiendo del tamaño del video."
+            )
+
+            report = generate_report(
+
+                self.video_path,
+
+                self.case_dir
+            )
+
+            self.log(
+                "[+] ANALISIS TERMINADO"
+            )
+
+            self.log(
+                f"[+] Reporte: {report}"
+            )
+
+            messagebox.showinfo(
+
+                "Análisis terminado",
+
+                f"Reporte generado en:\n{report}"
+            )
+
+        except Exception as e:
+
+            self.log(
+                f"[ERROR] {str(e)}"
+            )
+
+            messagebox.showerror(
+
+                "Error",
+
+                str(e)
+            )
+
+
+# ============================================================
+# EJECUCION
+# ============================================================
+
+if __name__ == "__main__":
+
+    root = tk.Tk()
+
+    app = VideoForensicsApp(
+        root
+    )
+
+    root.mainloop()
