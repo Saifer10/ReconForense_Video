@@ -1,25 +1,76 @@
-<h1>ReconForense_video V1</h1>
-<h2>Esta herramienta esta pensada para el análisis forense de videos soportando los formatos a demanda, tiene una interfaz interactiva que ayudara a la ejecución de las tareas como: </h2>
-- Análisis de autenticidad
-- Detección de posibles manipulaciones.
-- Análisis cuadro por cuadro.
-- Identificación de frames duplicados.
-- Extracción de fotogramas.
-- Análisis de artefactos.
-- Estabilización.
-- Corrección de iluminación.
-- Mejora de detalles.
-- Detección visual de inconsistencias.
-- Comparación entre material original y procesado.
-- Superposición de video.
-- Comparación lado a lado.
-- Sustracción de cambios entre original y resultado.
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+   <h1><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwKp1bw03GMEH6TawkZwi6Zhl2oqgRewamLxsXhrH2Gw&s=10" width="40">ReconForense_video (version 1.0)</h1>
+    Esta herramienta esta pensada para el análisis forense de videos, soportando los formatos a demanda. Tiene una interfaz interactiva que ayudara a la ejecución de las tareas como:<br>
+<br>
+* Análisis de autenticidad.<br>
+* Detección de posibles manipulaciones.<br>
+* Análisis cuadro por cuadro.<br>
+* Identificación de frames duplicados<br>
+* Extracción de fotogramas.<br>
+* Análisis de artefactos.<br>
+* Estabilización.<br>
+* Corrección de iluminación.<br>
+* Mejora de detalles.
+* Detección visual de inconsistencias.<br>
+* Comparación entre material original y procesado.<br>
+* Superposición de video.<br>
+* Comparación lado a lado.<br>
+* Sustracción de cambios entre original y resultado.<br>
+<br>
+<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcEMIi_JfBTrxIuN4GuDfbFAx4O1EvKtXTYcykS9L2dw&s=10" width="100">&nbsp;&nbsp;<img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Gnu-bash-logo.svg/1280px-Gnu-bash-logo.svg.png?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=thumbnail" width="90"><br>
+<br>
+Por medio del archivo <strong>install_ReconForensics.sh</strong> instale los complementos que requiere el programa
+    <title>Ejemplo de Recuadro de Código</title>
+    <style>
+        /* Estilo para el recuadro contenedor */
+        pre {
+            background-color: #666666; /* Fondo gris claro */
+            border: 1px solid #ddd;    /* Borde gris sutil */
+            border-left: 4px solid #007acc; /* Barra azul decorativa a la izquierda */
+            border-radius: 4px;        /* Esquinas ligeramente redondeadas */
+            padding: 6px;             /* Espacio interno */
+            overflow-x: auto;          /* Barra de desplazamiento si el código es muy largo */
+        }
+        /* Estilo para la tipografía del código */
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #FFF;
+        }
+    </style>
+</head>
+<body>
 
-Por medio del archivo /install_ReconForensic.py/ instale los complementos que requiere el programa
-$chmod +x install_ReconForensic.py
+    <p>Permisos de ejecucion para el archivo install_ReconForensic.py:</p>
 
-$bash install_ReconForensic.py
-Luego otorga los permisos al archivo python ReconForensic.py
-$chmod +x ReconForensic.py
-ejecuta el archivo
-$python3 ReconForensic.py
+    <!-- El bloque de código principal -->
+    <pre><code>@chmod +x install_ReconForensic.sh</code></pre>
+
+El archivo <strong>Install_ReconForensics</strong> debe instalar los siguientes dependencias<br>
+<br>
+    *  python3.<br> 
+    *  python3-venv.<br>
+    *  python3-tk.<br>
+    *  python3-opencv.<br>
+    *  python3-numpy.<br>
+    *  python3-pil.<br>
+    *  ffmpeg.<br>
+    *  ediainfo.<br>
+    *  libimage-exiftool-perl.<br>
+    *  hashdeep.<br>
+<br>
+Una vez instalado las dependencias se otorga permisos a el archivo python <strong>ReconForensic.py</strong>
+<p><strong>Permisos de ejecucion para el archivo install_ReconForensic.py:</strong></p>
+
+    <!-- El bloque de código principal -->
+    
+    <pre><code><span style="color: #10C8E0;">@chmod</span> +x ReconForensic.py</code></pre>
+    <p><strong>Ejecución del archivo ReconForensic.py</strong>:</p>
+
+    <!-- El bloque de código principal -->
+    <pre><code><span style="color: #10c280;">@bash</span> ReconForensic.py</code></pre>
+
+</body>
+</html>
