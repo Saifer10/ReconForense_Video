@@ -22,8 +22,9 @@
 <br>
 <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcEMIi_JfBTrxIuN4GuDfbFAx4O1EvKtXTYcykS9L2dw&s=10" width="100"><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Gnu-bash-logo.svg/1280px-Gnu-bash-logo.svg.png?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=thumbnail" width="90"><br>
 <br>
+Recomendable que descargue el repositorio en la ruta /opt/
 <p><strong>descargar el repositorio</strong></p>
-<pre>sudo git clone https://</pre>
+<pre>sudo git clone https://github.com/Saifer10/ReconForense_Video.git</pre>
 Por medio del archivo <strong>install_ReconForensics.sh</strong> se instalan las dependecias que requiere el programa
 <p>Permisos de ejecución para el archivo install_ReconForensic.sh:</p>
 <pre><code>@chmod +x install_ReconForensic.sh</code></pre>
