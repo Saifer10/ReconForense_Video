@@ -15,9 +15,10 @@ que ayudara a la ejecución de las tareas como:
   *Superposición de video.
   *Comparación lado a lado.
   *Sustracción de cambios entre original y resultado.
-------------------------------------------------------- 
+
 Por medio del archivo /install_ReconForensic.py/ instale los complementos que requiere el programa
 $chmod +x install_ReconForensic.py
+------------------------------
 $bash install_ReconForensic.py
 Luego otorga los permisos al archivo python ReconForensic.py
 $chmod +x ReconForensic.py
