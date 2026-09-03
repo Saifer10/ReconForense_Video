@@ -22,8 +22,10 @@
 <br>
 <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcEMIi_JfBTrxIuN4GuDfbFAx4O1EvKtXTYcykS9L2dw&s=10" width="100"><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Gnu-bash-logo.svg/1280px-Gnu-bash-logo.svg.png?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=thumbnail" width="90"><br>
 <br>
-Por medio del archivo <strong>install_ReconForensics.sh</strong> instale los complementos que requiere el programa
-<p>Permisos de ejecución para el archivo install_ReconForensic.py:</p>
+<p><strong>descargar el repositorio</strong></p>
+<pre>sudo git clone https://</pre>
+Por medio del archivo <strong>install_ReconForensics.sh</strong> se instalan las dependecias que requiere el programa
+<p>Permisos de ejecución para el archivo install_ReconForensic.sh:</p>
 <pre><code>@chmod +x install_ReconForensic.sh</code></pre>
 El archivo <strong>Install_ReconForensics</strong> debe instalar los siguientes dependencias<br>
 <br>
@@ -40,14 +42,9 @@ El archivo <strong>Install_ReconForensics</strong> debe instalar los siguientes 
 <br>
 Una vez instalado las dependencias se otorga permisos a el archivo python <strong>ReconForensic.py</strong>
 <p><strong>Permisos de ejecucion para el archivo install_ReconForensic.py:</strong></p>
-
-    <!-- El bloque de código principal -->
-    
-    <pre><code><span style="color: #10C8E0;">@chmod</span> +x ReconForensic.py</code></pre>
-    <p><strong>Ejecución del archivo ReconForensic.py</strong>:</p>
-
-    <!-- El bloque de código principal -->
-    <pre><code><span style="color: #10c280;">@bash</span> ReconForensic.py</code></pre>
+<pre><code> chmod +x ReconForensic.py</code></pre>
+<p><strong>Ejecución del archivo ReconForensic.py</strong>:</p>
+<pre><code>bash ReconForensic.py</code></pre>
 
 </body>
 </html>
