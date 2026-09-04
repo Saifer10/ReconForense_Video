@@ -27,7 +27,9 @@ Recomendable que descargue el repositorio en la ruta /opt/
 <pre>sudo git clone https://github.com/Saifer10/ReconForense_Video.git</pre>
 Por medio del archivo <strong>install_ReconForensics.sh</strong> se instalan las dependecias que requiere el programa
 <p>Permisos de ejecución para el archivo install_ReconForensic.sh:</p>
-<pre><code>@chmod +x install_ReconForensic.sh</code></pre>
+<pre><code>chmod +x install_ReconForensic.sh</code></pre>
+<p>Ejecución del archivo install_ReconForensic.sh:</p>
+<pre><code>bash install_ReconForensic.sh</code></pre>
 El archivo <strong>Install_ReconForensics</strong> debe instalar los siguientes dependencias<br>
 <br>
     *  python3.<br> 
@@ -41,11 +43,10 @@ El archivo <strong>Install_ReconForensics</strong> debe instalar los siguientes 
     *  libimage-exiftool-perl.<br>
     *  hashdeep.<br>
 <br>
-Una vez instalado las dependencias se otorga permisos a el archivo python <strong>ReconForensic.py</strong>
-<p><strong>Permisos de ejecucion para el archivo install_ReconForensic.py:</strong></p>
-<pre><code> chmod +x ReconForensic.py</code></pre>
-<p><strong>Ejecución del archivo ReconForensic.py</strong>:</p>
-<pre><code>bash ReconForensic.py</code></pre>
+Una vez instalado las dependencias se otorga permisos a el archivo python <strong>ReconForensic_GUI_v1.py</strong>
+<pre><code> chmod +x ReconForensic_GUI_v1.py</code></pre>
+<p><strong>Ejecución del archivo ReconForensic_GUI_v1.py</strong>:</p>
+<pre><code>Python3 ReconForensic_GUI_v1.py</code></pre>
 <img src="Reconforensic_GUI_v1.png" width="800">
 </body>
 </html>
