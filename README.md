@@ -46,6 +46,6 @@ Una vez instalado las dependencias se otorga permisos a el archivo python <stron
 <pre><code> chmod +x ReconForensic.py</code></pre>
 <p><strong>Ejecución del archivo ReconForensic.py</strong>:</p>
 <pre><code>bash ReconForensic.py</code></pre>
-
+<img src="Reconforensic_GUI_v1.png" width="800">
 </body>
 </html>
